@@ -1,0 +1,826 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Studio - Free QR Generator</title>
+<meta name="description" content="Create stylish QR codes with emojis, photos, custom shapes and colors. Free QR code generator.">
+
+<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f6fb;color:#202238}
+header{background:white;padding:18px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee}
+.logo{font-size:25px;font-weight:800;color:#635bff}
+nav a{margin-left:18px;text-decoration:none;color:#555;font-size:14px}
+.hero{text-align:center;padding:42px 15px 25px}
+.hero h1{font-size:34px;margin-bottom:12px}
+.hero p{color:#777;line-height:1.6}
+.container{max-width:1100px;margin:25px auto;padding:0 15px}
+.app{display:grid;grid-template-columns:1.4fr 1fr;gap:22px}
+.panel{background:white;padding:24px;border-radius:17px;box-shadow:0 5px 25px #252b490b}
+h2{font-size:19px;margin-bottom:18px}
+label{display:block;font-size:13px;font-weight:bold;margin:15px 0 8px}
+input,textarea,select{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:white}
+input[type=color]{height:43px;padding:4px}
+input[type=file]{padding:9px}
+textarea{min-height:80px;resize:vertical}
+.types{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:20px}
+.type{padding:12px 3px;border:1px solid #ddd;background:white;border-radius:9px;font-size:12px;cursor:pointer}
+.type.active{background:#efedff;border:2px solid #635bff;color:#635bff}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{cursor:pointer;border:0;border-radius:9px;padding:12px;font-weight:bold}
+.primary{background:#635bff;color:white}
+.secondary{background:#efedff;color:#635bff}
+.full{width:100%;margin-top:12px}
+.preview{text-align:center;position:sticky;top:15px;height:max-content}
+#qr{min-height:300px;display:flex;align-items:center;justify-content:center;padding:10px;overflow:hidden}
+#qr canvas,#qr svg{max-width:100%;height:auto}
+.downloads{display:flex;gap:10px}
+.downloads button{flex:1}
+hr{border:0;border-top:1px solid #eee;margin:22px 0}
+.shape-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.shape{padding:12px 5px;border:1px solid #ddd;background:white;border-radius:9px;font-size:12px}
+.shape.active{border:2px solid #635bff;background:#f1efff;color:#635bff}
+.emojis{display:flex;flex-wrap:wrap;gap:9px;margin-top:10px}
+.emoji{font-size:24px;background:#f3f3f8;padding:9px;border-radius:9px}
+.hidden{display:none}
+footer{text-align:center;padding:35px;color:#777;font-size:13px}
+.note{font-size:12px;color:#888;line-height:1.5;margin-top:8px}
+#status{font-size:13px;margin-top:12px;color:#635bff}
+@media(max-width:750px){
+.app{grid-template-columns:1fr}
+.preview{position:static}
+.hero h1{font-size:27px}
+.types{grid-template-columns:repeat(3,1fr)}
+header{padding:15px}
+nav a{margin-left:8px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">▦ QR Studio</div>
+<nav>
+<a href="#generator">Generator</a>
+<a href="#about">About</a>
+</nav>
+</header>
+
+<section class="hero">
+<h1>Free QR Code Generator</h1>
+<p>Create beautiful QR codes with photos, emojis and custom shapes.</p>
+</section>
+
+<main class="container">
+<div class="app" id="generator">
+
+<section class="panel">
+<h2>Choose QR Type</h2>
+
+<div class="types">
+<button class="type active" data-type="url">🌐 URL</button>
+<button class="type" data-type="text">📝 Text</button>
+<button class="type" data-type="wifi">📶 WiFi</button>
+<button class="type" data-type="whatsapp">💬 WhatsApp</button>
+<button class="type" data-type="email">✉️ Email</button>
+<button class="type" data-type="phone">📞 Phone</button>
+<button class="type" data-type="sms">💬 SMS</button>
+<button class="type" data-type="imageurl">🖼️ Photo URL</button>
+</div>
+
+<div id="fields"></div>
+
+<hr>
+<h2>QR Design & Shape</h2>
+
+<div class="shape-grid">
+<button class="shape active" data-shape="square">⬛ Square</button>
+<button class="shape" data-shape="dots">⠿ Dots</button>
+<button class="shape" data-shape="rounded">◉ Rounded</button>
+<button class="shape" data-shape="extra-rounded">⭕ Extra Round</button>
+<button class="shape" data-shape="classy">✦ Classy</button>
+<button class="shape" data-shape="classy-rounded">💠 Classy Round</button>
+</div>
+
+<label>QR Color</label>
+<div class="row">
+<input type="color" id="fg" value="#111111">
+<input type="color" id="bg" value="#ffffff">
+</div>
+<div class="row">
+<span class="note">QR foreground</span>
+<span class="note">Background</span>
+</div>
+
+<label>Corner Style</label>
+<select id="corner">
+<option value="square">Square</option>
+<option value="dot">Dot</option>
+<option value="extra-rounded">Rounded</option>
+</select>
+
+<label>QR Size</label>
+<select id="size">
+<option value="200">200 px</option>
+<option value="300" selected>300 px</option>
+<option value="400">400 px</option>
+<option value="600">600 px</option>
+</select>
+
+<hr>
+<h2>❤️ Photo & Emoji QR</h2>
+
+<label>Upload Photo / Logo</label>
+<input type="file" id="photo" accept="image/png,image/jpeg,image/webp">
+<p class="note">Your photo will appear in the center of the QR code.</p>
+
+<label>Or Choose Emoji</label>
+<div class="emojis">
+<button class="emoji" data-emoji="">❌</button>
+<button class="emoji" data-emoji="❤️">❤️</button>
+<button class="emoji" data-emoji="😍">😍</button>
+<button class="emoji" data-emoji="🔥">🔥</button>
+<button class="emoji" data-emoji="⭐">⭐</button>
+<button class="emoji" data-emoji="😊">😊</button>
+<button class="emoji" data-emoji="🌸">🌸</button>
+<button class="emoji" data-emoji="👑">👑</button>
+<button class="emoji" data-emoji="🐼">🐼</button>
+<button class="emoji" data-emoji="💎">💎</button>
+<button class="emoji" data-emoji="🎯">🎯</button>
+<button class="emoji" data-emoji="💖">💖</button>
+</div>
+
+<p class="note">Emoji and photo are placed in the QR center. They are not the encoded data themselves.</p>
+
+<button class="primary full" id="generate">✨ Generate QR Code</button>
+<button class="secondary full" id="reset">Reset All</button>
+<div id="status"></div>
+
+</section>
+
+<section class="panel preview">
+<h2>Your QR Code</h2>
+<div id="qr">
+<p style="color:#aaa">Your QR code will appear here.</p>
+</div>
+<p class="note">Scan with your mobile camera.</p>
+
+<div class="downloads">
+<button class="primary" id="png">⬇ PNG</button>
+<button class="secondary" id="svg">⬇ SVG</button>
+</div>
+<button class="secondary full" id="print">🖨 Print QR</button>
+</section>
+</div>
+
+<section class="panel" id="about" style="margin-top:25px">
+<h2>About QR Studio</h2>
+<p style="color:#777;line-height:1.8;font-size:14px">
+Create free QR codes for websites, WiFi, WhatsApp, email and photo links. Customize your QR code using colors, emojis, photos and different patterns. No registration required.
+</p>
+</section>
+</main>
+
+<footer>© 2026 QR Studio. All Rights Reserved.</footer>
+
+<script>
+let currentType="url";
+let currentShape="square";
+let logoData="";
+let emojiData="";
+let qr=null;
+
+const fields=document.getElementById("fields");
+const qrBox=document.getElementById("qr");
+const statusBox=document.getElementById("status");
+
+const templates={
+url:`<label>Website URL</label><input id="value" placeholder="https://example.com">`,
+text:`<label>Your Text</label><textarea id="value" placeholder="Enter your text"></textarea>`,
+wifi:`<label>WiFi Name</label><input id="ssid" placeholder="WiFi name"><label>Password</label><input id="password" placeholder="WiFi password"><label>Security</label><select id="security"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="nopass">No Password</option></select>`,
+whatsapp:`<label>Phone Number (country code included)</label><input id="phone" placeholder="97798XXXXXXXX"><label>Message</label><textarea id="message" placeholder="Hello!"></textarea>`,
+email:`<label>Email Address</label><input id="email" placeholder="example@gmail.com"><label>Subject</label><input id="subject" placeholder="Subject"><label>Message</label><textarea id="message" placeholder="Message"></textarea>`,
+phone:`<label>Phone Number</label><input id="value" placeholder="+97798XXXXXXXX">`,
+sms:`<label>Phone Number</label><input id="phone" placeholder="+97798XXXXXXXX"><label>Message</label><textarea id="message" placeholder="SMS message"></textarea>`,
+imageurl:`<label>Public Photo URL</label><input id="value" placeholder="https://example.com/photo.jpg"><p class="note">Enter a publicly accessible image link. QR will open that image when scanned.</p>`
+};
+
+function val(id){
+return document.getElementById(id)?.value.trim()||"";
+}
+
+function payload(){
+switch(currentType){
+case "url":
+case "text":
+return val("value");
+
+case "imageurl":
+return val("value");
+
+case "phone":
+return "tel:"+val("value");
+
+case "wifi":{
+let s=val("security");
+let n=val("ssid");
+let p=val("password");
+if(!n)return "";
+let escapeWifi=x=>x.replace(/([\\;,:"])/g,"\\$1");
+return `WIFI:T:${s};S:${escapeWifi(n)};P:${escapeWifi(p)};;`;
+}
+
+case "whatsapp":{
+let p=val("phone").replace(/\D/g,"");
+if(!p)return "";
+return "https://wa.me/"+p+"?text="+encodeURIComponent(val("message"));
+}
+
+case "email":{
+let e=val("email");
+if(!e)return "";
+return "mailto:"+e+"?subject="+encodeURIComponent(val("subject"))+"&body="+encodeURIComponent(val("message"));
+}
+
+case "sms":{
+let p=val("phone");
+return p?"SMSTO:"+p+":"+val("message"):"";
+}
+}
+return "";
+}
+
+// Convert emoji into an image for the QR center.
+function makeEmojiImage(emoji){
+if(!emoji)return Promise.resolve("");
+return new Promise(resolve=>{
+let canvas=document.createElement("canvas");
+canvas.width=160;
+canvas.height=160;
+let ctx=canvas.getContext("2d");
+ctx.fillStyle="#ffffff";
+ctx.beginPath();
+ctx.arc(80,80,76,0,Math.PI*2);
+ctx.fill();
+ctx.font="100px Arial";
+ctx.textAlign="center";
+ctx.textBaseline="middle";
+ctx.fillText(emoji,80,85);
+resolve(canvas.toDataURL("image/png"));
+});
+}
+
+async function generateQR(){
+try{
+statusBox.textContent="Generating QR code...";
+
+if(typeof QRCodeStyling==="undefined"){
+throw new Error("QR library not loaded. Please refresh the page and check your internet.");
+}
+
+let data=payload();
+
+if(!data){
+throw new Error("Please enter the required information first.");
+}
+
+let centerImage=logoData || emojiData;
+
+if(!centerImage){
+centerImage="";
+}
+
+let size=Number(document.getElementById("size").value);
+let fg=document.getElementById("fg").value;
+let bg=document.getElementById("bg").value;
+let corner=document.getElementById("corner").value;
+
+qr=new QRCodeStyling({
+width:size,
+height:size,
+type:"svg",
+data:data,
+margin:12,
+qrOptions:{
+errorCorrectionLevel:centerImage?"H":"Q"
+},
+image:centerImage || undefined,
+imageOptions:{
+hideBackgroundDots:true,
+imageSize:0.22,
+margin:5,
+crossOrigin:"anonymous"
+},
+dotsOptions:{
+color:fg,
+type:currentShape
+},
+backgroundOptions:{
+color:bg
+},
+cornersSquareOptions:{
+color:fg,
+type:corner
+},
+cornersDotOptions:{
+color:fg,
+type:corner==="dot"?"dot":"square"
+}
+});
+
+qrBox.innerHTML="";
+qr.append(qrBox);
+
+statusBox.textContent="QR code generated successfully!";
+}catch(error){
+statusBox.textContent=error.message;
+console.error(error);
+}
+}
+
+// QR types
+document.querySelectorAll(".type").forEach(button=>{
+button.addEventListener("click",()=>{
+document.querySelectorAll(".type").forEach(b=>b.classList.remove("active"));
+button.classList.add("active");
+currentType=button.dataset.type;
+fields.innerHTML=templates[currentType];
+statusBox.textContent="";
+});
+});
+
+// Shape selection
+document.querySelectorAll(".shape").forEach(button=>{
+button.addEventListener("click",()=>{
+document.querySelectorAll(".shape").forEach(b=>b.classList.remove("active"));
+button.classList.add("active");
+currentShape=button.dataset.shape;
+});
+});
+
+// Emoji selection
+document.querySelectorAll(".emoji").forEach(button=>{
+button.addEventListener("click",async()=>{
+emojiData=await makeEmojiImage(button.dataset.emoji);
+logoData="";
+document.getElementById("photo").value="";
+document.querySelectorAll(".emoji").forEach(b=>{
+b.style.outline="none";
+});
+button.style.outline="2px solid #635bff";
+});
+});
+
+// Photo upload
+document.getElementById("photo").addEventListener("change",event=>{
+const file=event.target.files[0];
+if(!file)return;
+
+if(file.size>2*1024*1024){
+alert("Photo must be smaller than 2 MB.");
+event.target.value="";
+return;
+}
+
+if(!file.type.startsWith("image/")){
+alert("Please select a valid image.");
+return;
+}
+
+let reader=new FileReader();
+reader.onload=()=>{
+logoData=reader.result;
+emojiData="";
+document.querySelectorAll(".emoji").forEach(b=>b.style.outline="none");
+};
+reader.readAsDataURL(file);
+});
+
+// Generate
+document.getElementById("generate").addEventListener("click",generateQR);
+
+// Download PNG
+document.getElementById("png").addEventListener("click",()=>{
+if(!qr){
+alert("First generate your QR code!");
+return;
+}
+qr.download({name:"qr-studio",extension:"png"});
+});
+
+// Download SVG
+document.getElementById("svg").addEventListener("click",()=>{
+if(!qr){
+alert("First generate your QR code!");
+return;
+}
+qr.download({name:"qr-studio",extension:"svg"});
+});
+
+// Print
+document.getElementById("print").addEventListener("click",()=>{
+if(!qr){
+alert("Generate your QR code first!");
+return;
+}
+let svg=qrBox.querySelector("svg");
+if(!svg){
+alert("QR is not ready.");
+return;
+}
+let w=window.open("","_blank");
+if(!w){
+alert("Allow popups to print.");
+return;
+}
+w.document.write("<html><body style='text-align:center;padding:30px'>"+svg.outerHTML+"</body></html>");
+w.document.close();
+w.onload=()=>w.print();
+});
+
+// Reset
+document.getElementById("reset").addEventListener("click",()=>{
+currentType="url";
+currentShape="square";
+logoData="";
+emojiData="";
+qr=null;
+fields.innerHTML=templates.url;
+qrBox.innerHTML="<p style='color:#aaa'>Your QR code will appear here.</p>";
+document.getElementById("fg").value="#111111";
+document.getElementById("bg").value="#ffffff";
+document.getElementById("corner").value="square";
+document.getElementById("size").value="300";
+document.getElementById("photo").value="";
+document.querySelectorAll(".type").forEach(b=>b.classList.toggle("active",b.dataset.type==="url"));
+document.querySelectorAll(".shape").forEach(b=>b.classList.toggle("active",b.dataset.shape==="square"));
+document.querySelectorAll(".emoji").forEach(b=>b.style.outline="none");
+statusBox.textContent="";
+});
+
+fields.innerHTML=templates.url;
+</script>
+</body>
+</html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#635bff">
+<title>QR Studio - Free QR Code Generator</title>
+<meta name="description" content="Create free custom QR codes for websites, WiFi, WhatsApp, email and more. Download QR codes in PNG and SVG format.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qr-code-styling/1.9.2/qr-code-styling.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f6f7fb;color:#20233a}
+header{background:white;padding:18px 7%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee}
+.logo{font-size:24px;font-weight:800;color:#635bff}
+nav a{margin-left:22px;text-decoration:none;color:#555;font-size:14px}
+.hero{text-align:center;padding:45px 15px 25px}
+.hero h1{font-size:36px;margin-bottom:12px}
+.hero p{color:#74788b;font-size:15px}
+.container{max-width:1050px;margin:25px auto;padding:0 15px}
+.app{display:grid;grid-template-columns:1.4fr 1fr;gap:22px}
+.panel{background:white;padding:25px;border-radius:17px;box-shadow:0 5px 25px #252b490b}
+h2{font-size:19px;margin-bottom:18px}
+.types{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:22px}
+.type{border:1px solid #e4e5ee;background:white;padding:12px 5px;border-radius:9px;cursor:pointer;font-size:12px;color:#444}
+.type.active{border:2px solid #635bff;background:#f2f1ff;color:#635bff}
+label{display:block;font-size:13px;font-weight:bold;margin:15px 0 8px}
+input,textarea,select{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;background:white}
+input:focus,textarea:focus,select:focus{border-color:#635bff}
+textarea{resize:vertical;min-height:85px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{cursor:pointer;border:0;border-radius:9px;padding:12px 17px;font-weight:bold}
+.primary{background:#635bff;color:white}
+.secondary{background:#f0efff;color:#635bff}
+.preview{text-align:center;position:sticky;top:20px;height:max-content}
+#qr{display:flex;justify-content:center;align-items:center;min-height:270px;padding:15px}
+#qr canvas,#qr svg{max-width:100%;height:auto}
+.preview p{font-size:13px;color:#888;margin:10px}
+.downloads{display:flex;gap:10px}
+.downloads button{flex:1}
+.full{width:100%;margin-top:12px}
+hr{border:0;border-top:1px solid #eee;margin:20px 0}
+.hidden{display:none!important}
+footer{text-align:center;padding:35px 15px;color:#777;font-size:13px}
+#scanner{margin-top:15px}
+#result{word-break:break-all;margin-top:12px;color:#16834b}
+@media(max-width:700px){
+.app{grid-template-columns:1fr}
+.hero h1{font-size:28px}
+.types{grid-template-columns:repeat(3,1fr)}
+.preview{position:static}
+header{padding:15px}
+nav a{margin-left:10px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">▦ QR Studio</div>
+<nav>
+<a href="#generator">Generator</a>
+<a href="#scannerSection">Scanner</a>
+<a href="#about">About</a>
+</nav>
+</header>
+
+<section class="hero">
+<h1>Free QR Code Generator</h1>
+<p>Create beautiful custom QR codes instantly. No signup required.</p>
+</section>
+
+<main class="container">
+<div class="app" id="generator">
+
+<section class="panel">
+<h2>Create Your QR Code</h2>
+
+<div class="types">
+<button class="type active" data-type="url">🌐 URL</button>
+<button class="type" data-type="text">📝 Text</button>
+<button class="type" data-type="wifi">📶 WiFi</button>
+<button class="type" data-type="whatsapp">💬 WhatsApp</button>
+<button class="type" data-type="email">✉️ Email</button>
+<button class="type" data-type="phone">📞 Phone</button>
+<button class="type" data-type="sms">💬 SMS</button>
+<button class="type" data-type="contact">👤 Contact</button>
+</div>
+
+<div id="fields"></div>
+
+<hr>
+<h2>Customize QR Code</h2>
+
+<div class="row">
+<div>
+<label>QR Color</label>
+<input type="color" id="fg" value="#171717">
+</div>
+<div>
+<label>Background</label>
+<input type="color" id="bg" value="#ffffff">
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>Dot Style</label>
+<select id="dots">
+<option value="square">Square</option>
+<option value="dots">Dots</option>
+<option value="rounded">Rounded</option>
+<option value="classy">Classy</option>
+</select>
+</div>
+<div>
+<label>QR Size</label>
+<select id="size">
+<option value="200">200 px</option>
+<option value="300" selected>300 px</option>
+<option value="400">400 px</option>
+<option value="600">600 px</option>
+</select>
+</div>
+</div>
+
+<label>Upload Center Logo (Optional)</label>
+<input type="file" id="logo" accept="image/png,image/jpeg,image/webp">
+
+<button class="primary full" id="generate">Generate QR Code</button>
+<button class="secondary full" id="reset">Reset All</button>
+</section>
+
+<section class="panel preview">
+<h2>Your QR Code</h2>
+<div id="qr"></div>
+<p>Scan this QR code with your phone camera.</p>
+
+<div class="downloads">
+<button class="primary" id="png">⬇ PNG</button>
+<button class="secondary" id="svg">⬇ SVG</button>
+</div>
+<button class="secondary full" id="print">🖨 Print QR Code</button>
+</section>
+
+</div>
+
+<section class="panel" id="scannerSection" style="margin-top:25px">
+<h2>📷 QR Code Scanner</h2>
+<p style="color:#777;font-size:13px">Scan a QR code using your camera.</p>
+<button class="primary full" id="startScanner">Start Camera Scanner</button>
+<div id="scanner"></div>
+<div id="result"></div>
+</section>
+
+<section class="panel" id="about" style="margin-top:25px">
+<h2>About QR Studio</h2>
+<p style="color:#777;line-height:1.8;font-size:14px">
+QR Studio is a free online QR code generator. Create QR codes for websites, WiFi, WhatsApp, phone numbers and more. Customize your design and download your QR code without registration.
+</p>
+</section>
+
+</main>
+
+<footer>
+<p>© 2026 QR Studio. All Rights Reserved.</p>
+<p style="margin-top:8px">Free QR Code Generator | Made for Everyone</p>
+</footer>
+
+<script>
+let currentType="url";
+let logoData="";
+let qr=null;
+let scanner=null;
+
+const fields=document.getElementById("fields");
+const qrBox=document.getElementById("qr");
+
+const templates={
+url:`<label>Website URL</label><input id="value" placeholder="https://example.com">`,
+text:`<label>Your Text</label><textarea id="value" placeholder="Enter your text here"></textarea>`,
+wifi:`<label>WiFi Name (SSID)</label><input id="ssid" placeholder="WiFi name"><label>WiFi Password</label><input id="password" placeholder="Password"><label>Security</label><select id="security"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="nopass">No Password</option></select>`,
+whatsapp:`<label>Phone Number (with country code)</label><input id="phone" placeholder="97798XXXXXXXX"><label>Message</label><textarea id="message" placeholder="Hello!"></textarea>`,
+email:`<label>Email Address</label><input id="email" placeholder="example@gmail.com"><label>Subject</label><input id="subject" placeholder="Subject"><label>Message</label><textarea id="message" placeholder="Your message"></textarea>`,
+phone:`<label>Phone Number</label><input id="value" placeholder="+97798XXXXXXXX">`,
+sms:`<label>Phone Number</label><input id="phone" placeholder="+97798XXXXXXXX"><label>SMS Message</label><textarea id="message" placeholder="Your message"></textarea>`,
+contact:`<label>Full Name</label><input id="name" placeholder="Your name"><label>Phone Number</label><input id="phone" placeholder="+97798XXXXXXXX"><label>Email</label><input id="email" placeholder="email@example.com"><label>Organization</label><input id="org" placeholder="Company name">`
+};
+
+function getValue(id){
+return document.getElementById(id)?.value.trim() || "";
+}
+
+function getPayload(){
+switch(currentType){
+case "url":
+return getValue("value");
+case "text":
+return getValue("value");
+case "phone":
+return "tel:"+getValue("value");
+case "wifi":{
+let s=getValue("security");
+let name=getValue("ssid");
+let pass=getValue("password");
+if(!name)return "";
+return `WIFI:T:${s};S:${name.replace(/[\\;,:"]/g,"\\$&")};P:${pass.replace(/[\\;,:"]/g,"\\$&")};;`;
+}
+case "whatsapp":{
+let p=getValue("phone").replace(/\D/g,"");
+let m=encodeURIComponent(getValue("message"));
+return p ? `https://wa.me/${p}?text=${m}`:"";
+}
+case "email":{
+let e=getValue("email");
+return e ? `mailto:${e}?subject=${encodeURIComponent(getValue("subject"))}&body=${encodeURIComponent(getValue("message"))}`:"";
+}
+case "sms":
+return getValue("phone") ? `SMSTO:${getValue("phone")}:${getValue("message")}`:"";
+case "contact":{
+let n=getValue("name");
+let p=getValue("phone");
+let e=getValue("email");
+let o=getValue("org");
+if(!n && !p && !e)return "";
+return `BEGIN:VCARD\nVERSION:3.0\nFN:${n}\nORG:${o}\nTEL:${p}\nEMAIL:${e}\nEND:VCARD`;
+}
+}
+return "";
+}
+
+function renderQR(){
+let data=getPayload();
+if(!data){
+alert("Please enter the required information first!");
+return;
+}
+
+let size=Number(document.getElementById("size").value);
+qr=new QRCodeStyling({
+width:size,
+height:size,
+type:"svg",
+data:data,
+margin:10,
+qrOptions:{errorCorrectionLevel:"H"},
+image:logoData || undefined,
+imageOptions:{
+hideBackgroundDots:true,
+imageSize:0.25,
+margin:5,
+crossOrigin:"anonymous"
+},
+dotsOptions:{
+color:document.getElementById("fg").value,
+type:document.getElementById("dots").value
+},
+backgroundOptions:{
+color:document.getElementById("bg").value
+},
+cornersSquareOptions:{color:document.getElementById("fg").value},
+cornersDotOptions:{color:document.getElementById("fg").value}
+});
+
+qrBox.innerHTML="";
+qr.append(qrBox);
+}
+
+document.querySelectorAll(".type").forEach(btn=>{
+btn.addEventListener("click",()=>{
+document.querySelectorAll(".type").forEach(b=>b.classList.remove("active"));
+btn.classList.add("active");
+currentType=btn.dataset.type;
+fields.innerHTML=templates[currentType];
+});
+});
+
+document.getElementById("generate").addEventListener("click",renderQR);
+
+["fg","bg","dots","size"].forEach(id=>{
+document.getElementById(id).addEventListener("change",()=>{
+if(qr)renderQR();
+});
+});
+
+document.getElementById("logo").addEventListener("change",e=>{
+const file=e.target.files[0];
+if(!file)return;
+if(file.size>2*1024*1024){
+alert("Logo must be smaller than 2 MB");
+e.target.value="";
+return;
+}
+const reader=new FileReader();
+reader.onload=()=>{
+logoData=reader.result;
+if(qr)renderQR();
+};
+reader.readAsDataURL(file);
+});
+
+document.getElementById("png").onclick=()=>{
+if(qr)qr.download({name:"qr-studio",extension:"png"});
+else alert("Generate a QR code first!");
+};
+
+document.getElementById("svg").onclick=()=>{
+if(qr)qr.download({name:"qr-studio",extension:"svg"});
+else alert("Generate a QR code first!");
+};
+
+document.getElementById("print").onclick=()=>{
+if(!qr){alert("Generate a QR code first!");return;}
+let svg=qrBox.querySelector("svg");
+if(!svg){alert("QR code not ready");return;}
+let w=window.open("","_blank");
+if(!w){alert("Please allow popups to print.");return;}
+w.document.write(`<html><body style="text-align:center;padding:30px">${svg.outerHTML}<script>window.onload=()=>window.print()<\/script></body></html>`);
+w.document.close();
+};
+
+document.getElementById("reset").onclick=()=>{
+logoData="";
+document.getElementById("logo").value="";
+document.getElementById("fg").value="#171717";
+document.getElementById("bg").value="#ffffff";
+document.getElementById("dots").value="square";
+document.getElementById("size").value="300";
+currentType="url";
+document.querySelectorAll(".type").forEach(b=>b.classList.toggle("active",b.dataset.type==="url"));
+fields.innerHTML=templates.url;
+qr=null;
+qrBox.innerHTML="";
+};
+
+document.getElementById("startScanner").onclick=async()=>{
+if(!window.Html5QrcodeScanner){
+alert("Scanner library failed to load. Check your internet connection.");
+return;
+}
+if(scanner){
+try{await scanner.clear()}catch(e){}
+scanner=null;
+}
+document.getElementById("scanner").innerHTML="";
+document.getElementById("result").textContent="";
+scanner=new Html5QrcodeScanner("scanner",{fps:10,qrbox:{width:220,height:220}});
+scanner.render(async(decoded)=>{
+document.getElementById("result").textContent="Scanned: "+decoded;
+try{await navigator.clipboard.writeText(decoded)}catch(e){}
+});
+};
+
+fields.innerHTML=templates.url;
+renderQR();
+</script>
+</body>
+</html>
